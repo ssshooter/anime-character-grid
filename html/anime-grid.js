@@ -112,7 +112,7 @@ ctx.textBaseline = 'middle';
 ctx.lineCap  = 'round';
 ctx.lineJoin = 'round';
 ctx.fillText(
-    '@卜卜口 · lab.magiconch.com/anime-grid · 神奇海螺试验场 · 动画信息来自番组计划 · 禁止商业、盈利用途',
+    '框架 @卜卜口 · 魔改 @ SSShooter · 动画信息来自 kitsu.io · 禁止商业、盈利用途',
     19 * scale,
     (height - 10) * scale
 );
@@ -356,7 +356,7 @@ const closeOutput = ()=>{
 }
 
 const downloadImage = ()=>{
-    const fileName = '[神奇海螺][动画角色个人喜好表].jpg';
+    const fileName = '[薄红幻想][动画角色个人喜好表].jpg';
     const mime = 'image/jpeg';
     const imgURL = canvas.toDataURL(mime,0.8);
     const linkEl = document.createElement('a');
