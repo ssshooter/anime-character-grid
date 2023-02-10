@@ -62,7 +62,7 @@ const Images = {};
 const loadImage = (src,onOver)=>{
     if(Images[src]) return onOver(Images[src]);
     const el = new Image();
-    el.crossOrigin = 'Anonymous';
+    // el.crossOrigin = 'Anonymous';
     el.src = src;
     el.onload = ()=>{
         onOver(el)
@@ -115,6 +115,11 @@ getBangumisFormLocalStorage();
 const saveBangumisToLocalStorage = ()=>{
     localStorage.setItem(bangumiLocalKey,getBangumiIdsText());
 };
+
+const clearData = () => {
+    localStorage.removeItem(bangumiLocalKey)
+    location.reload()
+}
 
 
 const canvas = document.querySelector('canvas');
