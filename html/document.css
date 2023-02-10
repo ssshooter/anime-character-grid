@@ -175,3 +175,6 @@ footer > * {
     width: calc((100vw - 20px - 8px) / 3 - 8px);
   }
 }
+.generator-btn {
+  margin-bottom: 12px;
+}
