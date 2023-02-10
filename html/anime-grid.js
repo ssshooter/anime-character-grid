@@ -132,7 +132,7 @@ ctx.save();
 
 
 ctx.font = 'bold 24px sans-serif';
-ctx.fillText('动画生涯个人喜好表',contentWidth / 2, -24 );
+ctx.fillText('动画角色个人喜好表',contentWidth / 2, -24 );
 
 
 
@@ -356,7 +356,7 @@ const closeOutput = ()=>{
 }
 
 const downloadImage = ()=>{
-    const fileName = '[神奇海螺][动画生涯个人喜好表].jpg';
+    const fileName = '[神奇海螺][动画角色个人喜好表].jpg';
     const mime = 'image/jpeg';
     const imgURL = canvas.toDataURL(mime,0.8);
     const linkEl = document.createElement('a');
