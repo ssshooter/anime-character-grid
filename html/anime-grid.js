@@ -29,24 +29,21 @@ const loadImage = (src,onOver)=>{
 };
 
 
-const typeTexts = `入坑作
-最喜欢
-看最多次
-最想安利
-
-最佳剧情
-最佳画面
-最佳配乐
-最佳配音
-
-最治愈
-最感动
-最虐心
-最被低估
-
-最过誉
-最离谱
-最讨厌`;
+const typeTexts = `最佳男主
+最佳女主
+最佳男配
+最佳女配
+我咋喜欢这人
+爱过
+讨厌
+妈！
+爸！
+心灵导师
+最憧憬
+最强
+最惨
+最心机
+最变态`;
 
 const types = typeTexts.trim().split(/\n+/g);
 
@@ -182,12 +179,13 @@ for(let y = 0;y < row;y++){
     }
 }
 
-const APIURL = `https://lab.magiconch.com/api/bangumi/`;
-// const APIURL = `http://localhost:60912/api/bangumi/`;
-const ImageURL = `https://api.anitabi.cn/bgm/`;
+const APIURL = `https://kitsu.io/api/edge/`;
+const ImageURL = `https://media.kitsu.io/`;
+const ImageURLProxy = `https://img-proxy.onrender.com/api`;
 
 
-const getCoverURLById = id => `${ImageURL}anime/${id}/cover.jpg`;
+const getCoverURLById = id => `${ImageURLProxy}/characters/images/${id}/original.jpg`;
+const getCoverDirById = id => `${ImageURL}/characters/images/${id}/original.jpg`;
 
 let currentBangumiIndex = null;
 const searchBoxEl = document.querySelector('.search-bangumis-box');
@@ -252,17 +250,19 @@ const searchFromBangumi = ()=>{
 
 
 const searchFromAPI = async keyword=>{
-    let url = `${APIURL}animes`;
-    if(keyword) url = url + `?keyword=${encodeURIComponent(keyword)}`;
+    let url = `${APIURL}characters`;
+    if(keyword) url = url + `?filter%5Bname%5D=${encodeURIComponent(keyword)}`;
 
     const animes = await get(url);
-    resetAnimeList(animes);
+    resetAnimeList(animes.data);
 }
 
 const resetAnimeList = animes=>{
-    animeListEl.innerHTML = animes.map(anime=>{
-        return `<div class="anime-item" data-id="${anime.id}"><img src="${getCoverURLById(anime.id)}" crossOrigin="Anonymous"><h3>${anime.title}</h3></div>`;
-    }).join('');
+    animeListEl.innerHTML = animes
+        .filter(character => character?.attributes?.image?.original)
+        .map(anime=>{
+            return `<div class="anime-item" data-id="${anime.id}"><img src="${getCoverDirById(anime.id)}"><h3>${anime.attributes.name}</h3></div>`;
+        }).join('');
 }
 formEl.onsubmit = async e=>{
     if(e) e.preventDefault();
