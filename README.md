@@ -33,6 +33,6 @@ https://github.com/ssshooter/anime-character-grid
 
 ## 利用
 
- - 动画信息来自 番组计划 https://anilist.co/
+ - 动画信息来自 https://anilist.co/
 
 禁止 商业、盈利 相关利用
