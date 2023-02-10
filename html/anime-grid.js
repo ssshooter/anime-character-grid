@@ -62,7 +62,7 @@ const Images = {};
 const loadImage = (src,onOver)=>{
     if(Images[src]) return onOver(Images[src]);
     const el = new Image();
-    // el.crossOrigin = 'Anonymous';
+    el.crossOrigin = 'Anonymous';
     el.src = src;
     el.onload = ()=>{
         onOver(el)
@@ -243,7 +243,7 @@ const openSearchBox = (index)=>{
 
     const value = bangumis[currentBangumiIndex];
 
-    if(!/^https/.test(value)){
+    if(!/^https/.test(value) && value !== 0){
         searchInputEl.value = value;
     }
         
@@ -269,10 +269,12 @@ const setInputText = ()=>{
     setCurrentBangumi(text);
 }
 
+const base = 'https://img-proxy.onrender.com/anilist'
 animeListEl.onclick = e=>{
     const url = e.target.firstChild.src;
     if(currentBangumiIndex === null) return;
-    setCurrentBangumi(url);
+    const urlObj = new URL(url)
+    setCurrentBangumi(base + urlObj.pathname);
 };
 
 
