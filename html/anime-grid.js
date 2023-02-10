@@ -281,7 +281,7 @@ const resetAnimeList = animes=>{
     animeListEl.innerHTML = animes
         .filter(character => character?.image?.medium)
         .map(anime=>{
-            return `<div class="anime-item" data-id="${anime.image.medium}"><img src="${anime.image.medium}"><h3>${anime.name.full}</h3></div>`;
+            return `<div class="anime-item" data-id="${anime.image.medium}"><img src="${anime.image.medium}"><h3>${anime.name.native || anime.name.full}</h3></div>`;
         }).join('');
 }
 
