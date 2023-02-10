@@ -1,6 +1,48 @@
 const htmlEl = document.documentElement;
 
 const Caches = {};
+var query = `
+query ( $page: Int, $perPage: Int, $search: String) {
+    Page(page: $page, perPage: $perPage) {
+      characters(search: $search) {
+        name {
+          full
+          native
+        }
+        image {
+          medium
+        }
+      }
+    }
+  }
+`;
+
+const graphQLGet = async (keyword)=>{
+    if(Caches[keyword]) return Caches[keyword];
+    htmlEl.setAttribute('data-no-touch',true);
+    var variables = {
+        search: keyword,
+    };
+    var url = 'https://graphql.anilist.co',
+    options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+            query: query,
+            variables: variables
+        })
+    };
+    const f = await fetch(url, options);
+    const data = await f.json();
+    Caches[keyword] = data.data.Page.characters;
+    console.log(data)
+    htmlEl.setAttribute('data-no-touch',false);
+    return Caches[keyword];
+}
+
 const get = async (url)=>{
 
     if(Caches[url]) return Caches[url];
@@ -112,7 +154,7 @@ ctx.textBaseline = 'middle';
 ctx.lineCap  = 'round';
 ctx.lineJoin = 'round';
 ctx.fillText(
-    '框架 @卜卜口 · 魔改 @ SSShooter · 动画信息来自 kitsu.io · 禁止商业、盈利用途',
+    '框架 @卜卜口 · 魔改 @ SSShooter · 动画信息来自 anilist.co · 禁止商业、盈利用途',
     19 * scale,
     (height - 10) * scale
 );
@@ -179,13 +221,7 @@ for(let y = 0;y < row;y++){
     }
 }
 
-const APIURL = `https://kitsu.io/api/edge/`;
-const ImageURL = `https://media.kitsu.io/`;
-const ImageURLProxy = `https://img-proxy.onrender.com/api`;
 
-
-const getCoverURLById = id => `${ImageURLProxy}/characters/images/${id}/original.jpg`;
-const getCoverDirById = id => `${ImageURL}/characters/images/${id}/original.jpg`;
 
 let currentBangumiIndex = null;
 const searchBoxEl = document.querySelector('.search-bangumis-box');
@@ -202,7 +238,7 @@ const openSearchBox = (index)=>{
 
     const value = bangumis[currentBangumiIndex];
 
-    if(!/^\d+$/.test(value)){
+    if(!/^https/.test(value)){
         searchInputEl.value = value;
     }
         
@@ -213,11 +249,6 @@ const closeSearchBox = ()=>{
     searchInputEl.value = '';
     formEl.onsubmit();
 };
-const setInputText = ()=>{
-    const text = searchInputEl.value.trim().replace(/,/g,'');
-    setCurrentBangumi(text);
-}
-
 
 const setCurrentBangumi =  (value)=>{
 
@@ -228,43 +259,33 @@ const setCurrentBangumi =  (value)=>{
     closeSearchBox();
 }
 
+const setInputText = ()=>{
+    const text = searchInputEl.value.trim().replace(/,/g,'');
+    setCurrentBangumi(text);
+}
+
 animeListEl.onclick = e=>{
-    const id = +e.target.getAttribute('data-id');
+    const url = e.target.firstChild.src;
     if(currentBangumiIndex === null) return;
-    setCurrentBangumi(id);
+    setCurrentBangumi(url);
 };
-
-const searchFromBangumiByKeyword = async keyword=>{
-    let url = `${APIURL}anime/onlines`;
-    if(keyword) url = url + `?keyword=${encodeURIComponent(keyword)}`;
-
-    const animes = await get(url);
-    resetAnimeList(animes);
-}
-const searchFromBangumi = ()=>{
-    const keyword = searchInputEl.value.trim();
-    if(!keyword) return searchInputEl.focus();
-
-    searchFromBangumiByKeyword(keyword);
-}
 
 
 const searchFromAPI = async keyword=>{
-    let url = `${APIURL}characters`;
-    if(keyword) url = url + `?filter%5Bname%5D=${encodeURIComponent(keyword)}`;
-
-    const animes = await get(url);
-    resetAnimeList(animes.data);
+    const animes = await graphQLGet(keyword);
+    resetAnimeList(animes);
 }
 
 const resetAnimeList = animes=>{
+    console.log('animes',animes)
     animeListEl.innerHTML = animes
-        .filter(character => character?.attributes?.image?.original)
+        .filter(character => character?.image?.medium)
         .map(anime=>{
-            return `<div class="anime-item" data-id="${anime.id}"><img src="${getCoverDirById(anime.id)}"><h3>${anime.attributes.name}</h3></div>`;
+            return `<div class="anime-item" data-id="${anime.image.medium}"><img src="${anime.image.medium}"><h3>${anime.name.full}</h3></div>`;
         }).join('');
 }
-formEl.onsubmit = async e=>{
+
+formEl.onsubmit = e=>{
     if(e) e.preventDefault();
 
     const keyword = searchInputEl.value.trim();
@@ -285,12 +306,12 @@ ctx.font = 'bold 32px sans-serif';
 
 const drawBangumis = ()=>{
     for(let index in bangumis){
-        const id = bangumis[index];
-        if(!id) continue;
+        const urlOrString = bangumis[index];
+        if(!urlOrString) continue;
         const x = index % col;
         const y = Math.floor(index / col);
 
-        if(!/^\d+$/.test(id)){ // 非数字
+        if(!/^https/.test(urlOrString)){ // 非链接
 
             ctx.save();
             ctx.fillStyle = '#FFF';
@@ -302,7 +323,7 @@ const drawBangumis = ()=>{
             )
             ctx.restore();
             ctx.fillText(
-                id,
+                urlOrString,
                 (x + 0.5) * colWidth,
                 (y + 0.5) * rowHeight - 4, 
                 imageWidth - 10,
@@ -310,7 +331,7 @@ const drawBangumis = ()=>{
             continue;
         }
         
-        loadImage(getCoverURLById(id),el=>{
+        loadImage(urlOrString,el=>{
             const { naturalWidth, naturalHeight } = el;
             const originRatio = el.naturalWidth / el.naturalHeight;
 
@@ -366,7 +387,6 @@ const downloadImage = ()=>{
     document.body.appendChild(linkEl);
     linkEl.click();
     document.body.removeChild(linkEl);
-    new Image().src = `${APIURL}grid?ids=${getBangumiIdsText()}`;
 
     showOutput(imgURL);
 }
